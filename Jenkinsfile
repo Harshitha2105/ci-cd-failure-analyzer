@@ -14,27 +14,21 @@ pipeline {
             }
         }
 
-        stage('Build Backend') {
+        stage('Build') {
             steps {
-                dir('backend') {
-                    bat 'mvn clean package -DskipTests'
-                }
+                bat 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Test Backend') {
+        stage('Test') {
             steps {
-                dir('backend') {
-                    bat 'mvn test'
-                }
+                bat 'mvn test'
             }
         }
 
         stage('Docker Build') {
             steps {
-                dir('backend') {
-                    bat 'docker build -t cicd-backend .'
-                }
+                bat 'docker build -t cicd-backend .'
             }
         }
 
