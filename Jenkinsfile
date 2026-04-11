@@ -40,21 +40,17 @@ pipeline {
     }
 
     post {
-        failure {
-            echo "❌ Pipeline failed. Sending logs to Failure Analyzer..."
-
-            bat '''
-            curl -X POST http://localhost:8080/api/logs/analyze \
-            -H "Content-Type: application/json" \
-            -d '{
-                "pipelineName": "Jenkins-Build",
-                "logContent": "Jenkins pipeline failed during build or test stage"
-            }'
-            '''
-        }
 
         success {
-            echo "✅ Pipeline executed successfully"
+            echo 'Pipeline executed successfully'
+        }
+
+        failure {
+            echo 'Pipeline failed'
+        }
+
+        always {
+            echo 'Build process completed'
         }
     }
 }
