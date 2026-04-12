@@ -49,6 +49,13 @@ pipeline {
                 bat 'docker-compose up -d'
             }
         }
+        stage('Debug Workspace') {
+    steps {
+        bat 'dir'
+        bat 'dir pom.xml'
+        bat 'dir backend'
+    }
+}
     }
 
     post {
