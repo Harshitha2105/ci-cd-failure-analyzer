@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build Backend') {
             steps {
-                bat 'mvn clean package -DskipTests'
+               bat 'mvn -f backend/pom.xml clean package -DskipTests'
             }
         }
 
