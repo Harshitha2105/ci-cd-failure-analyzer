@@ -8,78 +8,53 @@ pipeline {
 
     stages {
 
-        stage('Clean Workspace') {
-            steps {
-                deleteDir()
-            }
-        }
-
         stage('Checkout') {
             steps {
-                git 'https://github.com/Harshitha2105/ci-cd-failure-analyzer.git'
+                git 'https://github.com/your-username/ci-cd-failure-analyzer.git'
             }
         }
 
-        stage('Debug Workspace') {
+        stage('Build') {
             steps {
-                bat 'dir'
-                bat 'dir backend'
-                bat 'dir frontend'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Build Backend') {
+        stage('Test') {
             steps {
-                script {
-                    if (fileExists('backend/pom.xml')) {
-                        bat 'cd backend && mvn clean package -DskipTests'
-                    } else {
-                        error "backend/pom.xml NOT FOUND - checkout issue"
-                    }
-                }
+                sh 'mvn test'
             }
         }
 
-        stage('Verify Backend Jar') {
+        stage('Docker Build') {
             steps {
-                bat 'dir backend\\target'
+                sh 'docker build -t cicd-backend .'
             }
         }
 
-        stage('Frontend Check') {
+        stage('Run Container') {
             steps {
-                bat 'dir frontend'
-            }
-        }
-
-        stage('Docker Compose Down') {
-            steps {
-                bat 'docker-compose down || exit 0'
-            }
-        }
-
-        stage('Docker Compose Build') {
-            steps {
-                bat 'docker-compose build'
-            }
-        }
-
-        stage('Docker Compose Up') {
-            steps {
-                bat 'docker-compose up -d'
+                sh 'docker run -d -p 8080:8080 cicd-backend'
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline executed successfully'
-        }
         failure {
-            echo 'Pipeline failed - check logs above'
+            echo "❌ Pipeline failed. Sending logs to Failure Analyzer..."
+
+            sh '''
+            curl -X POST http://localhost:8080/api/logs/analyze \
+            -H "Content-Type: application/json" \
+            -d '{
+                "pipelineName": "Jenkins-Build",
+                "logContent": "Jenkins pipeline failed during build or test stage"
+            }'
+            '''
         }
-        always {
-            echo 'Build process completed'
+
+        success {
+            echo "✅ Pipeline executed successfully"
         }
     }
 }

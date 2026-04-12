@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "recharts": "^3.7.0"
+    "axios": "^1.15.0",
+    "recharts": "^3.7.0",
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3"
   }
 }

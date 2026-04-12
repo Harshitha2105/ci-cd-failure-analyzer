@@ -1,50 +1,47 @@
-import { useState } from "react";
-import { analyzeLog } from "../api/api";
+import React, { useState } from "react";
+import axios from "axios";
 
-export default function UploadLog({ onResult }) {
-  const [pipelineName, setPipelineName] = useState("");
-  const [logContent, setLogContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+const UploadLog = ({ onResult }) => {
+  const [log, setLog] = useState("");
+  const [pipeline, setPipeline] = useState("");
 
-  const submit = async () => {
-    setError("");
-    try {
-      setLoading(true);
-      const response = await analyzeLog({ pipelineName, logContent });
-      onResult(response.data);
-    } catch (err) {
-      setError("Backend not reachable or error occurred");
-    } finally {
-      setLoading(false);
-    }
+  const handleFile = (e) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setLog(event.target.result);
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+
+  const handleSubmit = async () => {
+    const res = await axios.post("http://localhost:8080/logs", {
+      pipelineName: pipeline,
+      logContent: log
+    });
+
+    onResult(res.data);
   };
 
   return (
-    <div className="card">
-      <h3>Upload CI/CD Log</h3>
+    <div>
+      <h3>Upload Pipeline Log</h3>
 
       <input
+        type="text"
         placeholder="Pipeline Name"
-        value={pipelineName}
-        onChange={(e) => setPipelineName(e.target.value)}
+        onChange={(e) => setPipeline(e.target.value)}
       />
-
-      <br /><br />
 
       <textarea
-        rows="6"
-        placeholder="Paste build log here"
-        value={logContent}
-        onChange={(e) => setLogContent(e.target.value)}
+        placeholder="Paste logs..."
+        onChange={(e) => setLog(e.target.value)}
       />
 
-      <br /><br />
+      <input type="file" onChange={handleFile} />
 
-      <button onClick={submit}>Analyze</button>
-
-      {loading && <p className="loading">Analyzing log...</p>}
-      {error && <p className="error">{error}</p>}
+      <button onClick={handleSubmit}>Analyze</button>
     </div>
   );
-}
+};
+
+export default UploadLog;

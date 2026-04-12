@@ -1,11 +1,27 @@
 package com.example.cicd.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@Data
-@AllArgsConstructor
 public class PredictionResponse {
+
     private double probability;
-    private String riskLevel;
+    private String risk;
+    private String predictedFailure;
+
+    // 🔥 Updated constructor
+    public PredictionResponse(double probability, String risk, String predictedFailure) {
+        this.probability = probability;
+        this.risk = risk;
+        this.predictedFailure = predictedFailure;
+    }
+
+    public double getProbability() {
+        return probability;
+    }
+
+    public String getRisk() {
+        return risk;
+    }
+
+    public String getPredictedFailure() {
+        return predictedFailure;
+    }
 }

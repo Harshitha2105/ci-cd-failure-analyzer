@@ -16,10 +16,9 @@ public class DashboardController {
 
     @Autowired
     private HealthScoreService healthService;
-
-    @GetMapping("/prediction")
-    public PredictionResponse getPrediction() {
-        return predictionService.predict();
+    @GetMapping("/predict/{pipeline}")
+    public PredictionResponse predict(@PathVariable String pipeline) {
+        return predictionService.predict(pipeline);
     }
 
     @GetMapping("/health")
