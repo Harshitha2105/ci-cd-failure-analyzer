@@ -10,7 +10,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-username/ci-cd-failure-analyzer.git'
+                git 'https://github.com/Harshitha2105/ci-cd-failure-analyzer.git'
             }
         }
 
