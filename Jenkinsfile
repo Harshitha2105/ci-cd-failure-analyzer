@@ -9,6 +9,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'cicd-backend'
         CONTAINER_NAME = 'cicd-backend-container'
+        API_URL = 'http://localhost:8082/api/logs/analyze'
     }
 
     stages {
@@ -65,7 +66,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 bat '''
-                docker run -d --name %CONTAINER_NAME% -p 8081:8080 %IMAGE_NAME%
+                docker run -d --name %CONTAINER_NAME% -p 8082:8082 %IMAGE_NAME%
                 '''
             }
         }
@@ -75,10 +76,22 @@ pipeline {
 
         success {
             echo 'Pipeline executed successfully'
+
+            bat '''
+            curl -X POST %API_URL% ^
+            -H "Content-Type: application/json" ^
+            -d "{\\"pipelineName\\":\\"Jenkins-Pipeline\\",\\"logContent\\":\\"Build completed successfully\\"}"
+            '''
         }
 
         failure {
             echo 'Pipeline failed - check logs above'
+
+            bat '''
+            curl -X POST %API_URL% ^
+            -H "Content-Type: application/json" ^
+            -d "{\\"pipelineName\\":\\"Jenkins-Pipeline\\",\\"logContent\\":\\"Build failed during pipeline execution\\"}"
+            '''
         }
 
         always {
