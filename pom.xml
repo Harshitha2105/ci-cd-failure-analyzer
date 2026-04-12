@@ -9,7 +9,7 @@
     <groupId>com.example</groupId>
     <artifactId>ci-cd-failure-analyzer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>CI/CD Failure Analyzer</name>
     <description>Final Year Project</description>
