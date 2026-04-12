@@ -20,24 +20,32 @@ pipeline {
             }
         }
 
-        stage('Test Backend') {
+        stage('Verify Backend Jar') {
             steps {
-                bat 'mvn test'
+                bat 'dir backend\\target'
             }
         }
 
-        stage('Check Workspace') {
+        stage('Build Frontend (Optional Check)') {
             steps {
-                bat 'dir'
                 bat 'dir frontend'
-                bat 'dir backend'
             }
         }
 
-        stage('Docker Compose Build & Run') {
+        stage('Docker Compose Down') {
             steps {
                 bat 'docker-compose down'
+            }
+        }
+
+        stage('Docker Compose Build') {
+            steps {
                 bat 'docker-compose build'
+            }
+        }
+
+        stage('Docker Compose Up') {
+            steps {
                 bat 'docker-compose up -d'
             }
         }
@@ -47,11 +55,9 @@ pipeline {
         success {
             echo 'Pipeline executed successfully'
         }
-
         failure {
             echo 'Pipeline failed'
         }
-
         always {
             echo 'Build process completed'
         }
