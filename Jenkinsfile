@@ -8,15 +8,35 @@ pipeline {
 
     stages {
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 git 'https://github.com/Harshitha2105/ci-cd-failure-analyzer.git'
             }
         }
 
+        stage('Debug Workspace') {
+            steps {
+                bat 'dir'
+                bat 'dir backend'
+                bat 'dir frontend'
+            }
+        }
+
         stage('Build Backend') {
             steps {
-               bat 'mvn -f backend/pom.xml clean package -DskipTests'
+                script {
+                    if (fileExists('backend/pom.xml')) {
+                        bat 'cd backend && mvn clean package -DskipTests'
+                    } else {
+                        error "backend/pom.xml NOT FOUND - checkout issue"
+                    }
+                }
             }
         }
 
@@ -26,7 +46,7 @@ pipeline {
             }
         }
 
-        stage('Build Frontend (Optional Check)') {
+        stage('Frontend Check') {
             steps {
                 bat 'dir frontend'
             }
@@ -34,7 +54,7 @@ pipeline {
 
         stage('Docker Compose Down') {
             steps {
-                bat 'docker-compose down'
+                bat 'docker-compose down || exit 0'
             }
         }
 
@@ -49,13 +69,6 @@ pipeline {
                 bat 'docker-compose up -d'
             }
         }
-        stage('Debug Workspace') {
-    steps {
-        bat 'dir'
-        bat 'dir pom.xml'
-        bat 'dir backend'
-    }
-}
     }
 
     post {
@@ -63,7 +76,7 @@ pipeline {
             echo 'Pipeline executed successfully'
         }
         failure {
-            echo 'Pipeline failed'
+            echo 'Pipeline failed - check logs above'
         }
         always {
             echo 'Build process completed'
