@@ -6,55 +6,83 @@ pipeline {
         jdk 'Java-17'
     }
 
+    environment {
+        IMAGE_NAME = 'cicd-backend'
+        CONTAINER_NAME = 'cicd-backend-container'
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/Harshitha2105/ci-cd-failure-analyzer.git'
+                deleteDir()
+                git branch: 'master',
+                url: 'https://github.com/Harshitha2105/ci-cd-failure-analyzer.git'
             }
         }
 
-        stage('Build') {
+        stage('Verify Files') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                bat 'dir'
+                bat 'dir backend'
             }
         }
 
-        stage('Test') {
+        stage('Build Backend') {
             steps {
-                bat 'mvn test'
+                bat 'mvn -f backend\\pom.xml clean package -DskipTests'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat 'mvn -f backend\\pom.xml test'
+            }
+        }
+
+        stage('Verify Jar') {
+            steps {
+                bat 'dir backend\\target'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                bat '''
+                docker rm -f %CONTAINER_NAME% 2>nul || exit /b 0
+                '''
             }
         }
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t cicd-backend .'
+                bat '''
+                docker build -t %IMAGE_NAME% backend
+                '''
             }
         }
 
         stage('Run Container') {
             steps {
-            bat 'docker run -d -p 8080:8080 cicd-backend'
+                bat '''
+                docker run -d --name %CONTAINER_NAME% -p 8080:8080 %IMAGE_NAME%
+                '''
             }
         }
     }
 
     post {
-        failure {
-            echo "❌ Pipeline failed. Sending logs to Failure Analyzer..."
-
-            bat '''
-            curl -X POST http://localhost:8080/api/logs/analyze \
-            -H "Content-Type: application/json" \
-            -d '{
-                "pipelineName": "Jenkins-Build",
-                "logContent": "Jenkins pipeline failed during build or test stage"
-            }'
-            '''
-        }
 
         success {
-            echo "✅ Pipeline executed successfully"
+            echo 'Pipeline executed successfully'
+        }
+
+        failure {
+            echo 'Pipeline failed - check logs above'
+        }
+
+        always {
+            echo 'Build process completed'
         }
     }
 }
