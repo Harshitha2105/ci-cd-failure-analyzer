@@ -14,27 +14,31 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Backend') {
             steps {
                 bat 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Test') {
+        stage('Test Backend') {
             steps {
                 bat 'mvn test'
             }
         }
 
-        stage('Docker Build') {
+        stage('Check Workspace') {
             steps {
-                bat 'docker build -t cicd-backend .'
+                bat 'dir'
+                bat 'dir frontend'
+                bat 'dir backend'
             }
         }
 
-        stage('Run Container') {
+        stage('Docker Compose Build & Run') {
             steps {
-                bat 'docker run -d -p 8080:8080 cicd-backend'
+                bat 'docker-compose down'
+                bat 'docker-compose build'
+                bat 'docker-compose up -d'
             }
         }
     }
