@@ -12,7 +12,6 @@ mvn spring-boot:run
 
 Run Frontend:
 cd frontend
-npm install
 npm start
 
 Features:
